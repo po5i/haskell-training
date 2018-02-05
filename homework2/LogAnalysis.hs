@@ -53,12 +53,16 @@ inOrder (Node left logMsg right) = inOrder left ++ [logMsg] ++ inOrder right
 -- returns a list of the messages corresponding to any errors with a severity of
 -- 50 or greater
 -- sorted by timestamp
-filterWrongLine :: LogMessage -> String
-filterWrongLine (LogMessage (Error lv) _ msg) = if lv >= 50 then msg else ""
-filterWrongLine _ = ""
+isError50 :: LogMessage -> Bool
+isError50 (LogMessage (Error lv) _ _) = lv >= 50
+isError50 _ = False
 
-filterList :: [LogMessage] -> [String]
-filterList = map filterWrongLine
+filterList :: [LogMessage] -> [LogMessage]
+filterList = filter isError50
+
+getErrorMsg :: LogMessage -> String
+getErrorMsg (LogMessage _ _ msg) = msg
+getErrorMsg _ = ""
 
 whatWentWrong :: [LogMessage] -> [String]
-whatWentWrong = filterList . inOrder . build
+whatWentWrong = map getErrorMsg . filterList . inOrder . build
